@@ -8,6 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;800&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
       :root {
         --bg-dark: #161224;
@@ -132,7 +133,6 @@
         pointer-events: none;
       }
 
-      /* Floating Question Mark */
       .question-mark {
         position: absolute;
         right: 20px;
@@ -158,7 +158,6 @@
         }
       }
 
-      /* Image Styling */
       .image-wrap {
         position: relative;
         display: flex;
@@ -179,7 +178,6 @@
         filter: brightness(1) drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.5));
       }
 
-      /* Feedback Pill */
       .feedback-wrapper {
         display: flex;
         justify-content: center;
@@ -205,13 +203,11 @@
         border: 2px solid #dc3545;
       }
 
-      /* UI Controls */
       .ui-container {
         position: relative;
         z-index: 2;
         margin-top: 20px;
       }
-
       .input-row {
         display: flex;
         gap: 10px;
@@ -227,7 +223,6 @@
         font-family: "Nunito", sans-serif;
         font-weight: 700;
         font-size: 1rem;
-        box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.5);
       }
 
       .btn-go {
@@ -239,7 +234,6 @@
         font-size: 1.6rem;
         padding: 0 25px;
         cursor: pointer;
-        transition: transform 0.1s;
         box-shadow: 0 4px 0 #b38f00;
       }
       .btn-go:active {
@@ -259,42 +253,35 @@
         margin-top: 15px;
         letter-spacing: 1px;
       }
-
       .btn-next {
         background: #ed6c6c;
-        border-color: #a83232;
         box-shadow: 0 4px 0 #a83232;
       }
       .btn-next:active {
         transform: translateY(4px);
         box-shadow: 0 0 0 #a83232;
       }
-
       .btn-skip {
         background: var(--burst-blue);
-        border-color: var(--poke-dark-blue);
-        box-shadow: 0 4px 0 var(--poke-dark-blue);
         color: var(--poke-dark-blue);
+        box-shadow: 0 4px 0 var(--poke-dark-blue);
       }
       .btn-skip:active {
         transform: translateY(4px);
         box-shadow: 0 0 0 var(--poke-dark-blue);
       }
 
-      /* Options Grids */
       .options-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
-
       .length-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         gap: 5px;
         margin-bottom: 20px;
       }
-
       .option-btn {
         background: var(--bg-dark);
         border: 2px solid #000;
@@ -303,18 +290,10 @@
         padding: 15px;
         font-weight: 700;
         cursor: pointer;
-        transition: 0.2s;
-        font-family: "Nunito", sans-serif;
       }
       .length-grid .option-btn {
         padding: 10px 5px;
-        font-size: 1.1rem;
         font-family: "Bangers", cursive;
-        letter-spacing: 1px;
-      }
-
-      .option-btn:hover {
-        background: var(--poke-dark-blue);
       }
       .option-btn.correct {
         background: #28a745 !important;
@@ -322,9 +301,41 @@
       .option-btn.wrong {
         background: #dc3545 !important;
       }
-
       .hidden {
         display: none !important;
+      }
+
+      /* --- END SCREEN EXPORT WRAPPER --- */
+      #captureWrapper {
+        position: relative;
+        padding: 20px;
+        border-radius: 16px;
+        background: var(--red-outer);
+        overflow: hidden;
+        margin-bottom: 15px;
+      }
+
+      .inner-panel {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 30px 20px;
+        border-radius: 16px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+      }
+
+      /* Image Watermark Link */
+      .watermark-link {
+        margin-top: 15px;
+        font-family: "Nunito", sans-serif;
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-align: center;
+        text-shadow: 1px 1px 2px #000;
+        position: relative;
+        z-index: 2;
+        letter-spacing: 0.5px;
       }
 
       /* Social Share Buttons */
@@ -332,41 +343,51 @@
         display: flex;
         gap: 10px;
         justify-content: center;
-        margin-bottom: 25px;
+        margin-bottom: 15px;
         width: 100%;
+        position: relative;
+        z-index: 2;
       }
-
       .btn-social {
         flex: 1;
-        padding: 10px;
+        padding: 12px 5px;
         font-family: "Nunito", sans-serif;
         font-weight: 800;
-        font-size: 1rem;
+        font-size: 0.95rem;
         border-radius: 12px;
         border: 2px solid #000;
         cursor: pointer;
         color: white;
-        transition: transform 0.1s;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
       }
-
       .btn-social:active {
         transform: translateY(4px);
       }
-
       .btn-twitter {
-        background: #1da1f2;
-        box-shadow: 0 4px 0 #0c85d0;
+        background: #33a1f2;
+        box-shadow: 0 4px 0 #187abf;
       }
-
+      .btn-twitter:active {
+        box-shadow: 0 0 0 #187abf;
+      }
       .btn-reddit {
         background: #ff4500;
         box-shadow: 0 4px 0 #cc3700;
       }
-
+      .btn-reddit:active {
+        box-shadow: 0 0 0 #cc3700;
+      }
       .btn-discord {
-        background: #5865f2; /* Discord Blurple */
+        background: #5865f2;
         box-shadow: 0 4px 0 #4752c4;
+      }
+      .btn-discord:active {
+        box-shadow: 0 0 0 #4752c4;
       }
     </style>
   </head>
@@ -446,7 +467,6 @@
             background: var(--poke-yellow);
             color: black;
             box-shadow: 0 4px 0 #b38f00;
-            border-color: #000;
           "
         >
           START GAME
@@ -456,16 +476,13 @@
 
     <div id="gameScreen" class="game-card hidden">
       <div class="burst-rays"></div>
-
       <div class="title-text" style="font-size: 2.2rem">
         WHO'S THAT MISCRIT...?
       </div>
       <div class="question-mark">?</div>
-
       <div class="feedback-wrapper">
         <div id="feedback" class="feedback hidden"></div>
       </div>
-
       <div class="image-wrap">
         <img class="miscrit-img" id="miscritImg" src="" alt="Silhouette" />
       </div>
@@ -477,7 +494,6 @@
           <button class="option-btn"></button>
           <button class="option-btn"></button>
         </div>
-
         <div id="hardUI" class="input-row hidden">
           <input
             type="text"
@@ -488,110 +504,114 @@
           />
           <button class="btn-go" id="btnSubmit">GO</button>
         </div>
-
         <button class="btn-action btn-skip" id="btnSkip">SKIP ⏭️</button>
         <button class="btn-action btn-next hidden" id="btnNext">NEXT →</button>
       </div>
     </div>
 
-    <div id="endScreen" class="game-card hidden">
-      <div class="burst-rays"></div>
-      <div class="title-text" style="font-size: 3rem; margin-bottom: 20px">
-        FINISHED!
+    <div
+      id="endScreen"
+      class="game-card hidden"
+      style="padding: 10px; background: none; border: none; box-shadow: none"
+    >
+      <div id="captureWrapper">
+        <div class="burst-rays"></div>
+        <div
+          class="title-text"
+          id="endTitle"
+          style="font-size: 3.2rem; margin-bottom: 20px; z-index: 2"
+        >
+          FINISHED!
+        </div>
+
+        <div class="inner-panel">
+          <h2
+            style="
+              font-family: 'Bangers', cursive;
+              color: var(--poke-yellow);
+              font-size: 2.2rem;
+              margin-bottom: 0px;
+              letter-spacing: 2px;
+            "
+          >
+            FINAL SCORE
+          </h2>
+          <div
+            style="
+              font-family: 'Bangers', cursive;
+              font-size: 4.5rem;
+              color: #28a745;
+              text-shadow: 3px 3px 0 #000;
+              margin-bottom: 15px;
+              line-height: 1;
+            "
+          >
+            <span id="finalScoreDisplay">0</span
+            ><span style="font-size: 2.5rem; color: #fff">
+              / <span id="finalTotalDisplay">0</span></span
+            >
+          </div>
+
+          <h2
+            style="
+              font-family: 'Bangers', cursive;
+              color: var(--poke-yellow);
+              font-size: 1.8rem;
+              margin-bottom: 0px;
+              letter-spacing: 2px;
+            "
+          >
+            TIME
+          </h2>
+          <div
+            id="finalTimeDisplay"
+            style="
+              font-family: 'Bangers', cursive;
+              font-size: 3.2rem;
+              color: var(--burst-blue);
+              text-shadow: 3px 3px 0 #000;
+              line-height: 1;
+            "
+          >
+            00:00
+          </div>
+        </div>
+
+        <div class="watermark-link">
+          🎮 Play at: nyvora-vision-labs.github.io/Guess_the_Miscrit
+        </div>
       </div>
 
-      <div
-        class="ui-container"
-        style="
-          background: rgba(0, 0, 0, 0.6);
-          padding: 30px 20px;
-          border-radius: 16px;
-          text-align: center;
-        "
-      >
-        <h2
-          style="
-            font-family: 'Bangers', cursive;
-            color: var(--poke-yellow);
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-          "
-        >
-          Final Score
-        </h2>
-        <div
-          style="
-            font-family: 'Bangers', cursive;
-            font-size: 4.5rem;
-            color: #28a745;
-            text-shadow: 3px 3px 0 #000;
-            margin-bottom: 25px;
-            line-height: 1;
-          "
-        >
-          <span id="finalScoreDisplay">0</span>
-          <span style="font-size: 2.5rem; color: #fff"
-            >/ <span id="finalTotalDisplay">0</span></span
-          >
-        </div>
-
-        <h2
-          style="
-            font-family: 'Bangers', cursive;
-            color: var(--poke-yellow);
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-          "
-        >
-          Time
-        </h2>
-        <div
-          style="
-            font-family: 'Bangers', cursive;
-            font-size: 3rem;
-            color: var(--burst-blue);
-            text-shadow: 3px 3px 0 #000;
-            margin-bottom: 35px;
-            line-height: 1;
-          "
-          id="finalTimeDisplay"
-        >
-          00:00
-        </div>
-
-        <div class="social-row">
-          <button class="btn-social btn-twitter" id="btnShareTwitter">
-            🐦 X / Twitter
-          </button>
-          <button class="btn-social btn-reddit" id="btnShareReddit">
-            🤖 Reddit
-          </button>
-          <button class="btn-social btn-discord" id="btnShareDiscord">
-            📋 Copy for Discord
-          </button>
-        </div>
-
-        <button
-          class="btn-action"
-          id="btnPlayAgain"
-          style="
-            background: var(--poke-yellow);
-            color: black;
-            box-shadow: 0 4px 0 #b38f00;
-            border-color: #000;
-            font-size: 1.8rem;
-            padding: 15px;
-          "
-        >
-          PLAY AGAIN 🔄
+      <div class="social-row">
+        <button class="btn-social btn-twitter" id="btnShareTwitter">
+          <span style="font-size: 1.2rem">🐦</span> X / Twitter
+        </button>
+        <button class="btn-social btn-reddit" id="btnShareReddit">
+          <span style="font-size: 1.2rem">🤖</span> Reddit
+        </button>
+        <button class="btn-social btn-discord" id="btnShareDiscord">
+          <span style="font-size: 1.2rem">📋</span> Copy for Discord
         </button>
       </div>
+
+      <button
+        class="btn-action"
+        id="btnPlayAgain"
+        style="
+          background: var(--poke-yellow);
+          color: black;
+          box-shadow: 0 4px 0 #b38f00;
+          border-color: #000;
+          font-size: 1.8rem;
+          padding: 15px;
+        "
+      >
+        PLAY AGAIN 🔄
+      </button>
     </div>
 
     <script>
-      // Make sure these names match your files in the 'miscrits_silhouettes' folder EXACTLY
+      // Include your massive MISCRITS_DATA array here
       const MISCRITS_DATA = [
         "Aebex_silhouette",
         "Agnuf_silhouette",
@@ -941,7 +961,7 @@
 
       const FOLDER = "miscrits_silhouettes";
       let gameMode = "easy";
-      let totalMiscrits = 25; // Default length
+      let totalMiscrits = 25;
       let currentIdx = 0;
       let score = 0;
       let queue = [];
@@ -949,16 +969,18 @@
       let timerInterval = null;
       let secondsElapsed = 0;
 
-      // --- HOME BUTTON ---
-      document.getElementById("btnHome").onclick = () => {
+      // --- SETUP & GAME LOGIC ---
+      document.getElementById("btnHome").onclick = resetToHome;
+      document.getElementById("btnPlayAgain").onclick = resetToHome;
+
+      function resetToHome() {
         clearInterval(timerInterval);
         document.getElementById("gameScreen").classList.add("hidden");
         document.getElementById("topStatsBar").classList.add("hidden");
         document.getElementById("endScreen").classList.add("hidden");
         document.getElementById("introScreen").classList.remove("hidden");
-      };
+      }
 
-      // --- SELECTION LOGIC ---
       document.getElementById("pickEasy").onclick = () => {
         gameMode = "easy";
         updateModeBtns();
@@ -967,7 +989,6 @@
         gameMode = "hard";
         updateModeBtns();
       };
-
       function updateModeBtns() {
         document.getElementById("pickEasy").style.borderColor =
           gameMode === "easy" ? "var(--poke-yellow)" : "#000";
@@ -975,7 +996,6 @@
           gameMode === "hard" ? "var(--poke-yellow)" : "#000";
       }
 
-      // Length Selection setup
       document.querySelectorAll(".length-btn").forEach((btn) => {
         btn.onclick = (e) => {
           totalMiscrits = parseInt(e.target.dataset.len);
@@ -987,25 +1007,20 @@
           e.target.style.background = "var(--poke-dark-blue)";
         };
       });
-      // Click default value visually
       document.querySelector('.length-btn[data-len="25"]').click();
 
-      // --- GAME START ---
       document.getElementById("btnStart").onclick = () => {
-        // Shuffle and take N items
         queue = [...MISCRITS_DATA]
           .sort(() => Math.random() - 0.5)
           .slice(0, totalMiscrits);
         currentIdx = 0;
         score = 0;
         secondsElapsed = 0;
-
         document.getElementById("totalRoundsDisplay").textContent =
           queue.length;
         document.getElementById("scoreCorrect").textContent = score;
 
         document.getElementById("introScreen").classList.add("hidden");
-        document.getElementById("endScreen").classList.add("hidden");
         document.getElementById("topStatsBar").classList.remove("hidden");
         document.getElementById("gameScreen").classList.remove("hidden");
 
@@ -1013,7 +1028,6 @@
         loadRound();
       };
 
-      // --- TIMER LOGIC ---
       function startTimer() {
         clearInterval(timerInterval);
         updateTimerUI();
@@ -1022,7 +1036,6 @@
           updateTimerUI();
         }, 1000);
       }
-
       function updateTimerUI() {
         let m = Math.floor(secondsElapsed / 60)
           .toString()
@@ -1031,11 +1044,9 @@
         document.getElementById("timeDisplay").textContent = `${m}:${s}`;
       }
 
-      // --- ROUND LOGIC ---
       function loadRound() {
         answered = false;
         const name = queue[currentIdx];
-
         const imgEl = document.getElementById("miscritImg");
         imgEl.src = `${FOLDER}/${name}.png`;
         imgEl.classList.remove("revealed");
@@ -1055,12 +1066,10 @@
       function setupEasy(correctName) {
         document.getElementById("easyUI").classList.remove("hidden");
         document.getElementById("hardUI").classList.add("hidden");
-
         let others = MISCRITS_DATA.filter((n) => n !== correctName)
           .sort(() => Math.random() - 0.5)
           .slice(0, 3);
         let choices = [correctName, ...others].sort(() => Math.random() - 0.5);
-
         const btns = document.querySelectorAll("#easyUI .option-btn");
         btns.forEach((btn, i) => {
           btn.textContent = choices[i].replace("_silhouette", "");
@@ -1080,22 +1089,18 @@
           checkAnswer(input.value);
       }
 
-      // --- ANSWER VALIDATION ---
       function checkAnswer(guess, btn = null) {
         if (answered) return;
         answered = true;
-
         const correctName = queue[currentIdx];
         const cleanName = correctName.replace("_silhouette", "");
-
         const isCorrect =
           guess.toLowerCase().trim() === correctName.toLowerCase() ||
           guess.toLowerCase().trim() === cleanName.toLowerCase();
 
         document.getElementById("miscritImg").classList.add("revealed");
         document.getElementById("btnNext").classList.remove("hidden");
-        document.getElementById("btnSkip").classList.add("hidden"); // Hide skip when answered
-
+        document.getElementById("btnSkip").classList.add("hidden");
         const feedback = document.getElementById("feedback");
         feedback.classList.remove("hidden");
 
@@ -1110,51 +1115,23 @@
           feedback.className = "feedback wrong";
           if (btn) btn.classList.add("wrong");
         }
-
         if (gameMode === "hard")
           document.getElementById("guessInput").disabled = true;
       }
 
-      // --- SKIP LOGIC ---
       document.getElementById("btnSkip").onclick = () => {
         if (answered) return;
-
-        // Take the current miscrit and push it to the end of the array
-        const skippedMiscrit = queue.splice(currentIdx, 1)[0];
-        queue.push(skippedMiscrit);
-
-        // Reload round (currentIdx stays the same, but it points to the new item that slid forward)
+        queue.push(queue.splice(currentIdx, 1)[0]);
         loadRound();
       };
 
-      // --- NEXT LOGIC ---
       document.getElementById("btnNext").onclick = () => {
         currentIdx++;
         if (currentIdx < queue.length) {
           loadRound();
         } else {
-          clearInterval(timerInterval);
-          let timeFinal = document.getElementById("timeDisplay").textContent;
-
-          // Hide game UI elements
-          document.getElementById("gameScreen").classList.add("hidden");
-          document.getElementById("topStatsBar").classList.add("hidden");
-
-          // Populate Final Stats
-          document.getElementById("finalScoreDisplay").textContent = score;
-          document.getElementById("finalTotalDisplay").textContent =
-            queue.length;
-          document.getElementById("finalTimeDisplay").textContent = timeFinal;
-
-          // Show Custom End Screen
-          document.getElementById("endScreen").classList.remove("hidden");
+          showEndScreen();
         }
-      };
-
-      // --- PLAY AGAIN LOGIC ---
-      document.getElementById("btnPlayAgain").onclick = () => {
-        document.getElementById("endScreen").classList.add("hidden");
-        document.getElementById("introScreen").classList.remove("hidden");
       };
 
       document
@@ -1163,37 +1140,83 @@
           if (e.key === "Enter") document.getElementById("btnSubmit").click();
         });
 
-      // --- SHARE LOGIC ---
-      function getShareText() {
-        const timeFinal = document.getElementById("timeDisplay").textContent;
-        const modeText = gameMode.charAt(0).toUpperCase() + gameMode.slice(1);
-        const total = queue.length;
+      function showEndScreen() {
+        clearInterval(timerInterval);
+        document.getElementById("gameScreen").classList.add("hidden");
+        document.getElementById("topStatsBar").classList.add("hidden");
 
-        return `I just played Who's That Miscrit?!\n\n🎮 Mode: ${modeText}\n🏆 Score: ${score}/${total}\n⏱️ Time: ${timeFinal}\n\nCan you beat my score?`;
+        document.getElementById("finalScoreDisplay").textContent = score;
+        document.getElementById("finalTotalDisplay").textContent = queue.length;
+        document.getElementById("finalTimeDisplay").textContent =
+          document.getElementById("timeDisplay").textContent;
+        document.getElementById("endScreen").classList.remove("hidden");
       }
 
+      // --- SHARING LOGIC ---
+
+      // Twitter Share (Text & URL only - Opens immediately)
       document.getElementById("btnShareTwitter").onclick = () => {
-        const text = encodeURIComponent(getShareText());
+        const gameUrl =
+          "https://nyvora-vision-labs.github.io/Guess_the_Miscrit/";
+        const text = encodeURIComponent(
+          `I scored ${score}/${queue.length} in Who's That Miscrit?! Can you beat me? Play here: ${gameUrl}`
+        );
         window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
       };
 
+      // Reddit Share (Text & URL only - Opens immediately)
       document.getElementById("btnShareReddit").onclick = () => {
-        const text = encodeURIComponent(getShareText());
-        window.open(
-          `https://www.reddit.com/submit?title=Who's%20That%20Miscrit?!&text=${text}`,
-          "_blank"
+        const gameUrl =
+          "https://nyvora-vision-labs.github.io/Guess_the_Miscrit/";
+        const text = encodeURIComponent(
+          `I scored ${score}/${queue.length} in Who's That Miscrit?! Play here: ${gameUrl}`
         );
+        window.open(`https://www.reddit.com/submit?title=${text}`, "_blank");
       };
 
-      document.getElementById("btnShareDiscord").onclick = () => {
-        navigator.clipboard.writeText(getShareText()).then(() => {
-          const btn = document.getElementById("btnShareDiscord");
-          const originalText = btn.innerHTML;
-          btn.innerHTML = "✅ Copied!";
-          setTimeout(() => {
-            btn.innerHTML = originalText;
-          }, 2000);
-        });
+      // Discord Share (Image generator & clipboard copy)
+      document.getElementById("btnShareDiscord").onclick = async (e) => {
+        const btn = e.currentTarget;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = "Generating...";
+
+        try {
+          const wrapper = document.getElementById("captureWrapper");
+          const titleEl = document.getElementById("endTitle");
+
+          // Temporarily change text for the screenshot
+          const originalText = titleEl.textContent;
+          titleEl.textContent = "GUESS THE MISCRITS!";
+
+          const canvas = await html2canvas(wrapper, {
+            backgroundColor: null,
+            scale: 2,
+          });
+
+          // Revert text
+          titleEl.textContent = originalText;
+
+          const blob = await new Promise((resolve) =>
+            canvas.toBlob(resolve, "image/png")
+          );
+
+          // Copy to clipboard
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+
+          btn.innerHTML = "✅ Copied to Clipboard!";
+        } catch (err) {
+          console.error("Share error:", err);
+          btn.innerHTML = "❌ Failed to copy";
+          alert(
+            "Your browser denied clipboard access or image generation failed."
+          );
+        }
+
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+        }, 3000);
       };
     </script>
   </body>
