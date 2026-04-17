@@ -326,6 +326,48 @@
       .hidden {
         display: none !important;
       }
+
+      /* Social Share Buttons */
+      .social-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 25px;
+        width: 100%;
+      }
+
+      .btn-social {
+        flex: 1;
+        padding: 10px;
+        font-family: "Nunito", sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        border-radius: 12px;
+        border: 2px solid #000;
+        cursor: pointer;
+        color: white;
+        transition: transform 0.1s;
+        text-align: center;
+      }
+
+      .btn-social:active {
+        transform: translateY(4px);
+      }
+
+      .btn-twitter {
+        background: #1da1f2;
+        box-shadow: 0 4px 0 #0c85d0;
+      }
+
+      .btn-reddit {
+        background: #ff4500;
+        box-shadow: 0 4px 0 #cc3700;
+      }
+
+      .btn-discord {
+        background: #5865f2; /* Discord Blurple */
+        box-shadow: 0 4px 0 #4752c4;
+      }
     </style>
   </head>
   <body>
@@ -517,6 +559,18 @@
           id="finalTimeDisplay"
         >
           00:00
+        </div>
+
+        <div class="social-row">
+          <button class="btn-social btn-twitter" id="btnShareTwitter">
+            🐦 X / Twitter
+          </button>
+          <button class="btn-social btn-reddit" id="btnShareReddit">
+            🤖 Reddit
+          </button>
+          <button class="btn-social btn-discord" id="btnShareDiscord">
+            📋 Copy for Discord
+          </button>
         </div>
 
         <button
@@ -1073,7 +1127,7 @@
         loadRound();
       };
 
-      // --- NEXT LOGIC (UPDATED FOR CUSTOM END SCREEN) ---
+      // --- NEXT LOGIC ---
       document.getElementById("btnNext").onclick = () => {
         currentIdx++;
         if (currentIdx < queue.length) {
@@ -1108,6 +1162,39 @@
         .addEventListener("keypress", (e) => {
           if (e.key === "Enter") document.getElementById("btnSubmit").click();
         });
+
+      // --- SHARE LOGIC ---
+      function getShareText() {
+        const timeFinal = document.getElementById("timeDisplay").textContent;
+        const modeText = gameMode.charAt(0).toUpperCase() + gameMode.slice(1);
+        const total = queue.length;
+
+        return `I just played Who's That Miscrit?!\n\n🎮 Mode: ${modeText}\n🏆 Score: ${score}/${total}\n⏱️ Time: ${timeFinal}\n\nCan you beat my score?`;
+      }
+
+      document.getElementById("btnShareTwitter").onclick = () => {
+        const text = encodeURIComponent(getShareText());
+        window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+      };
+
+      document.getElementById("btnShareReddit").onclick = () => {
+        const text = encodeURIComponent(getShareText());
+        window.open(
+          `https://www.reddit.com/submit?title=Who's%20That%20Miscrit?!&text=${text}`,
+          "_blank"
+        );
+      };
+
+      document.getElementById("btnShareDiscord").onclick = () => {
+        navigator.clipboard.writeText(getShareText()).then(() => {
+          const btn = document.getElementById("btnShareDiscord");
+          const originalText = btn.innerHTML;
+          btn.innerHTML = "✅ Copied!";
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+          }, 2000);
+        });
+      };
     </script>
   </body>
 </html>
