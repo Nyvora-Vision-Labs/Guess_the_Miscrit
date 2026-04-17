@@ -37,7 +37,6 @@
         padding: 20px 16px;
       }
 
-      /* Pokemon Style Text */
       .title-text {
         font-family: "Bangers", cursive;
         font-size: 2.8rem;
@@ -53,7 +52,6 @@
         z-index: 2;
       }
 
-      /* Top Stats Bar */
       .top-bar {
         display: flex;
         justify-content: space-between;
@@ -92,7 +90,6 @@
         border-radius: 12px;
       }
 
-      /* Main Game Card Container */
       .game-card {
         position: relative;
         background: var(--red-outer);
@@ -106,7 +103,6 @@
         overflow: hidden;
       }
 
-      /* The Anime Sunburst Effect */
       .burst-rays {
         position: absolute;
         top: 50%;
@@ -146,6 +142,11 @@
         transform: rotate(15deg);
         z-index: 2;
         animation: float 3s ease-in-out infinite;
+        transition: opacity 0.3s ease;
+      }
+      .question-mark.hidden-q {
+        opacity: 0;
+        pointer-events: none;
       }
 
       @keyframes float {
@@ -168,14 +169,34 @@
         z-index: 2;
       }
 
+      /* ── Silhouette / reveal states ── */
       .miscrit-img {
         max-height: 220px;
         max-width: 100%;
+        /* silhouette: solid black */
         filter: brightness(0) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8));
-        transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      /* silhouette removed, show real colours */
+      .miscrit-img.revealed {
+        filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.5));
+        transform: scale(1.05);
+      }
+      /* brief pop animation when revealed */
+      @keyframes revealPop {
+        0% {
+          transform: scale(0.85);
+        }
+        60% {
+          transform: scale(1.12);
+        }
+        100% {
+          transform: scale(1.05);
+        }
       }
       .miscrit-img.revealed {
-        filter: brightness(1) drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.5));
+        animation: revealPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       }
 
       .feedback-wrapper {
@@ -305,7 +326,7 @@
         display: none !important;
       }
 
-      /* --- END SCREEN EXPORT WRAPPER --- */
+      /* --- END SCREEN --- */
       #captureWrapper {
         position: relative;
         padding: 20px;
@@ -324,7 +345,6 @@
         z-index: 2;
       }
 
-      /* Image Watermark Link */
       .watermark-link {
         margin-top: 15px;
         font-family: "Nunito", sans-serif;
@@ -338,7 +358,6 @@
         letter-spacing: 0.5px;
       }
 
-      /* Social Share Buttons */
       .social-row {
         display: flex;
         gap: 10px;
@@ -405,6 +424,7 @@
       </div>
     </div>
 
+    <!-- INTRO SCREEN -->
     <div class="game-card" id="introScreen">
       <div class="burst-rays"></div>
       <div class="title-text">WHO'S THAT<br />MISCRIT...?</div>
@@ -474,15 +494,18 @@
       </div>
     </div>
 
+    <!-- GAME SCREEN -->
     <div id="gameScreen" class="game-card hidden">
       <div class="burst-rays"></div>
       <div class="title-text" style="font-size: 2.2rem">
         WHO'S THAT MISCRIT...?
       </div>
-      <div class="question-mark">?</div>
+      <div class="question-mark" id="questionMark">?</div>
+
       <div class="feedback-wrapper">
         <div id="feedback" class="feedback hidden"></div>
       </div>
+
       <div class="image-wrap">
         <img class="miscrit-img" id="miscritImg" src="" alt="Silhouette" />
       </div>
@@ -509,6 +532,7 @@
       </div>
     </div>
 
+    <!-- END SCREEN -->
     <div
       id="endScreen"
       class="game-card hidden"
@@ -551,7 +575,6 @@
               / <span id="finalTotalDisplay">0</span></span
             >
           </div>
-
           <h2
             style="
               font-family: 'Bangers', cursive;
@@ -611,7 +634,6 @@
     </div>
 
     <script>
-      // Include your massive MISCRITS_DATA array here
       const MISCRITS_DATA = [
         "Aebex_silhouette",
         "Agnuf_silhouette",
@@ -959,7 +981,9 @@
         "Zhakor_silhouette",
       ];
 
-      const FOLDER = "miscrits_silhouettes";
+      const SILHOUETTE_FOLDER = "miscrits_silhouettes";
+      const REAL_IMAGE_FOLDER = "images_scraped_from_miscripedia";
+
       let gameMode = "easy";
       let totalMiscrits = 25;
       let currentIdx = 0;
@@ -969,7 +993,37 @@
       let timerInterval = null;
       let secondsElapsed = 0;
 
-      // --- SETUP & GAME LOGIC ---
+      // ── helpers ──────────────────────────────────────────────
+      /** Strip "_silhouette" suffix to get the display name */
+      function cleanName(entry) {
+        return entry.replace("_silhouette", "");
+      }
+
+      /**
+       * Attempt to swap the <img> to the real colour image.
+       * Falls back to the silhouette (un-filtered) if the real image 404s.
+       */
+      function revealRealImage(entry) {
+        const imgEl = document.getElementById("miscritImg");
+        const name = cleanName(entry);
+
+        // Preload to detect 404 before swapping src
+        const tester = new Image();
+        tester.onload = () => {
+          imgEl.src = tester.src;
+          imgEl.classList.add("revealed");
+        };
+        tester.onerror = () => {
+          // No real image found — just remove the silhouette filter in place
+          imgEl.classList.add("revealed");
+        };
+        tester.src = `${REAL_IMAGE_FOLDER}/${name}.png`;
+
+        // Hide the floating "?"
+        document.getElementById("questionMark").classList.add("hidden-q");
+      }
+
+      // ── navigation ───────────────────────────────────────────
       document.getElementById("btnHome").onclick = resetToHome;
       document.getElementById("btnPlayAgain").onclick = resetToHome;
 
@@ -989,6 +1043,7 @@
         gameMode = "hard";
         updateModeBtns();
       };
+
       function updateModeBtns() {
         document.getElementById("pickEasy").style.borderColor =
           gameMode === "easy" ? "var(--poke-yellow)" : "#000";
@@ -1028,6 +1083,7 @@
         loadRound();
       };
 
+      // ── timer ─────────────────────────────────────────────────
       function startTimer() {
         clearInterval(timerInterval);
         updateTimerUI();
@@ -1037,44 +1093,54 @@
         }, 1000);
       }
       function updateTimerUI() {
-        let m = Math.floor(secondsElapsed / 60)
+        const m = Math.floor(secondsElapsed / 60)
           .toString()
           .padStart(2, "0");
-        let s = (secondsElapsed % 60).toString().padStart(2, "0");
+        const s = (secondsElapsed % 60).toString().padStart(2, "0");
         document.getElementById("timeDisplay").textContent = `${m}:${s}`;
       }
 
+      // ── round loading ─────────────────────────────────────────
       function loadRound() {
         answered = false;
-        const name = queue[currentIdx];
+        const entry = queue[currentIdx];
         const imgEl = document.getElementById("miscritImg");
-        imgEl.src = `${FOLDER}/${name}.png`;
+
+        // Reset to silhouette
+        imgEl.src = `${SILHOUETTE_FOLDER}/${entry}.png`;
         imgEl.classList.remove("revealed");
         imgEl.onerror = () => {
           imgEl.src = "https://via.placeholder.com/200?text=Missing+Image";
         };
+
+        // Restore "?" mark
+        document.getElementById("questionMark").classList.remove("hidden-q");
 
         document.getElementById("roundNum").textContent = currentIdx + 1;
         document.getElementById("feedback").classList.add("hidden");
         document.getElementById("btnNext").classList.add("hidden");
         document.getElementById("btnSkip").classList.remove("hidden");
 
-        if (gameMode === "easy") setupEasy(name);
+        if (gameMode === "easy") setupEasy(entry);
         else setupHard();
       }
 
-      function setupEasy(correctName) {
+      function setupEasy(correctEntry) {
         document.getElementById("easyUI").classList.remove("hidden");
         document.getElementById("hardUI").classList.add("hidden");
-        let others = MISCRITS_DATA.filter((n) => n !== correctName)
+
+        const others = MISCRITS_DATA.filter((n) => n !== correctEntry)
           .sort(() => Math.random() - 0.5)
           .slice(0, 3);
-        let choices = [correctName, ...others].sort(() => Math.random() - 0.5);
+        const choices = [correctEntry, ...others].sort(
+          () => Math.random() - 0.5
+        );
+
         const btns = document.querySelectorAll("#easyUI .option-btn");
         btns.forEach((btn, i) => {
-          btn.textContent = choices[i].replace("_silhouette", "");
+          btn.textContent = cleanName(choices[i]);
           btn.className = "option-btn";
-          btn.onclick = () => checkAnswer(choices[i], btn);
+          btn.onclick = () => checkAnswer(cleanName(choices[i]), btn);
         });
       }
 
@@ -1089,36 +1155,41 @@
           checkAnswer(input.value);
       }
 
+      // ── answer checking ───────────────────────────────────────
       function checkAnswer(guess, btn = null) {
         if (answered) return;
         answered = true;
-        const correctName = queue[currentIdx];
-        const cleanName = correctName.replace("_silhouette", "");
-        const isCorrect =
-          guess.toLowerCase().trim() === correctName.toLowerCase() ||
-          guess.toLowerCase().trim() === cleanName.toLowerCase();
 
-        document.getElementById("miscritImg").classList.add("revealed");
+        const entry = queue[currentIdx];
+        const name = cleanName(entry); // e.g. "Dark Aria"
+        const isCorrect = guess.trim().toLowerCase() === name.toLowerCase();
+
+        // ── REVEAL REAL IMAGE ──────────────────────────────────
+        revealRealImage(entry);
+
         document.getElementById("btnNext").classList.remove("hidden");
         document.getElementById("btnSkip").classList.add("hidden");
+
         const feedback = document.getElementById("feedback");
         feedback.classList.remove("hidden");
 
         if (isCorrect) {
           score++;
           document.getElementById("scoreCorrect").textContent = score;
-          feedback.textContent = `Correct! It's ${cleanName}!`;
+          feedback.textContent = `✅ Correct! It's ${name}!`;
           feedback.className = "feedback correct";
           if (btn) btn.classList.add("correct");
         } else {
-          feedback.textContent = `Wrong! It was ${cleanName}.`;
+          feedback.textContent = `❌ Wrong! It was ${name}.`;
           feedback.className = "feedback wrong";
           if (btn) btn.classList.add("wrong");
         }
+
         if (gameMode === "hard")
           document.getElementById("guessInput").disabled = true;
       }
 
+      // ── skip / next ───────────────────────────────────────────
       document.getElementById("btnSkip").onclick = () => {
         if (answered) return;
         queue.push(queue.splice(currentIdx, 1)[0]);
@@ -1127,11 +1198,8 @@
 
       document.getElementById("btnNext").onclick = () => {
         currentIdx++;
-        if (currentIdx < queue.length) {
-          loadRound();
-        } else {
-          showEndScreen();
-        }
+        if (currentIdx < queue.length) loadRound();
+        else showEndScreen();
       };
 
       document
@@ -1140,6 +1208,7 @@
           if (e.key === "Enter") document.getElementById("btnSubmit").click();
         });
 
+      // ── end screen ────────────────────────────────────────────
       function showEndScreen() {
         clearInterval(timerInterval);
         document.getElementById("gameScreen").classList.add("hidden");
@@ -1152,68 +1221,53 @@
         document.getElementById("endScreen").classList.remove("hidden");
       }
 
-      // --- SHARING LOGIC ---
-
-      // Twitter Share (Text & URL only - Opens immediately)
+      // ── sharing ───────────────────────────────────────────────
       document.getElementById("btnShareTwitter").onclick = () => {
-        const gameUrl =
-          "https://nyvora-vision-labs.github.io/Guess_the_Miscrit/";
+        const url = "https://nyvora-vision-labs.github.io/Guess_the_Miscrit/";
         const text = encodeURIComponent(
-          `I scored ${score}/${queue.length} in Who's That Miscrit?! Can you beat me? Play here: ${gameUrl}`
+          `I scored ${score}/${queue.length} in Who's That Miscrit?! Can you beat me? Play here: ${url}`
         );
         window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
       };
 
-      // Reddit Share (Text & URL only - Opens immediately)
       document.getElementById("btnShareReddit").onclick = () => {
-        const gameUrl =
-          "https://nyvora-vision-labs.github.io/Guess_the_Miscrit/";
+        const url = "https://nyvora-vision-labs.github.io/Guess_the_Miscrit/";
         const text = encodeURIComponent(
-          `I scored ${score}/${queue.length} in Who's That Miscrit?! Play here: ${gameUrl}`
+          `I scored ${score}/${queue.length} in Who's That Miscrit?! Play here: ${url}`
         );
         window.open(`https://www.reddit.com/submit?title=${text}`, "_blank");
       };
 
-      // Discord Share (Image generator & clipboard copy)
       document.getElementById("btnShareDiscord").onclick = async (e) => {
         const btn = e.currentTarget;
         const originalHtml = btn.innerHTML;
         btn.innerHTML = "Generating...";
-
         try {
           const wrapper = document.getElementById("captureWrapper");
           const titleEl = document.getElementById("endTitle");
-
-          // Temporarily change text for the screenshot
-          const originalText = titleEl.textContent;
+          const origText = titleEl.textContent;
           titleEl.textContent = "GUESS THE MISCRITS!";
 
           const canvas = await html2canvas(wrapper, {
             backgroundColor: null,
             scale: 2,
           });
+          titleEl.textContent = origText;
 
-          // Revert text
-          titleEl.textContent = originalText;
-
-          const blob = await new Promise((resolve) =>
-            canvas.toBlob(resolve, "image/png")
+          const blob = await new Promise((res) =>
+            canvas.toBlob(res, "image/png")
           );
-
-          // Copy to clipboard
           await navigator.clipboard.write([
             new ClipboardItem({ "image/png": blob }),
           ]);
-
           btn.innerHTML = "✅ Copied to Clipboard!";
         } catch (err) {
-          console.error("Share error:", err);
+          console.error(err);
           btn.innerHTML = "❌ Failed to copy";
           alert(
             "Your browser denied clipboard access or image generation failed."
           );
         }
-
         setTimeout(() => {
           btn.innerHTML = originalHtml;
         }, 3000);
