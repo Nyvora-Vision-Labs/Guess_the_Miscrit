@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """
-Miscrit Silhouette Generator (Improved)
+Miscrit Silhouette Generator
 Takes each Miscrit image, removes background, fills character solid black,
 and saves as a silhouette PNG with transparent background.
 
 Requirements:
-    pip install Pillow rembg numpy
+    pip install Pillow rembg
+
+Usage:
+    python silhouette_miscrits.py
+    python silhouette_miscrits.py --input my_folder --output my_output
 """
 
 import argparse
 import os
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image
 import numpy as np
 
 try:
@@ -24,75 +28,36 @@ except ImportError:
     print("Falling back to alpha-channel-only mode (works if images already have transparency).\n")
 
 
-def fill_internal_holes(img: Image.Image) -> Image.Image:
-    """
-    Fills fully enclosed transparent holes inside the solid object in the alpha channel.
-    This fixes issues where the AI mistakenly punches holes inside the character.
-    """
-    alpha = img.split()[-1]
-    # Create a stark black/white mask (0 = background, 255 = object)
-    mask = alpha.point(lambda p: 255 if p > 10 else 0, mode="L")
-
-    # Add a 1-pixel black border so floodfill can reach around the entire outside
-    # even if the character touches the very edge of the image canvas.
-    padded_mask = Image.new("L", (mask.width + 2, mask.height + 2), 0)
-    padded_mask.paste(mask, (1, 1))
-
-    # Flood fill from the top-left corner (0, 0) with a temporary value (128)
-    ImageDraw.floodfill(padded_mask, (0, 0), 128)
-
-    # Crop it back to the original image size
-    mask_l = padded_mask.crop((1, 1, mask.width + 1, mask.height + 1))
-
-    mask_array = np.array(mask_l)
-    alpha_array = np.array(alpha)
-
-    # Any pixel that is still 0 was completely enclosed by the object (an internal hole).
-    # We fix the hole by setting its alpha to 255 (solid).
-    alpha_array[mask_array == 0] = 255
-
-    new_alpha = Image.fromarray(alpha_array, mode="L")
-    img.putalpha(new_alpha)
-    return img
-
-
 def remove_background(img: Image.Image) -> Image.Image:
-    """Remove background smartly, skipping if the image is already transparent."""
-    img_rgba = img.convert("RGBA")
-    data = np.array(img_rgba)
-    alpha = data[:, :, 3]
-
-    # Heuristic check: If more than 5% of the image is fully transparent,
-    # it likely ALREADY has a removed background. Skip rembg to preserve details!
-    if np.mean(alpha < 10) > 0.05:
-        return img_rgba
-
+    """Remove background using rembg (AI-based) or fallback to existing alpha."""
     if REMBG_AVAILABLE:
-        # post_process=True helps smooth edges and prevent some artifacts
-        return remove(img_rgba, post_process=True)
+        return remove(img)
     else:
-        return img_rgba
+        # Fallback: if image already has alpha, use it; otherwise just convert
+        if img.mode != "RGBA":
+            img = img.convert("RGBA")
+        return img
 
 
 def make_silhouette(img: Image.Image, shadow_color=(0, 0, 0)) -> Image.Image:
     """
-    Given an RGBA image, fill all non-transparent pixels with solid black, keeping alpha intact.
+    Given an RGBA image (background removed), fill all non-transparent
+    pixels with solid black (or any shadow_color), keeping alpha intact.
     """
     img = img.convert("RGBA")
-    
-    # 1. Patch up any internal holes first
-    img = fill_internal_holes(img)
-
-    # 2. Apply the shadow color
     data = np.array(img)
+
+    # Unpack only the RGB values from the shadow_color tuple
     r, g, b = shadow_color
 
+    # Where alpha > threshold, set to the shadow color; preserve the original alpha channel
     threshold = 10
     mask = data[:, :, 3] > threshold
 
     data[mask, 0] = r
     data[mask, 1] = g
     data[mask, 2] = b
+    # data[mask, 3] remains unchanged, preserving the original transparency/edges
 
     return Image.fromarray(data, "RGBA")
 
@@ -120,13 +85,13 @@ def process_folder(input_dir: str, output_dir: str):
         try:
             img = Image.open(img_path).convert("RGBA")
 
-            # Step 1: Remove background (or skip if already transparent)
+            # Step 1: Remove background
             img_no_bg = remove_background(img)
 
-            # Step 2: Fill character with black & fix holes
+            # Step 2: Fill character with black
             silhouette = make_silhouette(img_no_bg)
 
-            # Step 3: Save as PNG
+            # Step 3: Save as PNG (preserves transparency)
             silhouette.save(out_file, "PNG")
             print("✓")
             success += 1
