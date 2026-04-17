@@ -424,7 +424,6 @@
       </div>
     </div>
 
-    <!-- INTRO SCREEN -->
     <div class="game-card" id="introScreen">
       <div class="burst-rays"></div>
       <div class="title-text">WHO'S THAT<br />MISCRIT...?</div>
@@ -494,7 +493,6 @@
       </div>
     </div>
 
-    <!-- GAME SCREEN -->
     <div id="gameScreen" class="game-card hidden">
       <div class="burst-rays"></div>
       <div class="title-text" style="font-size: 2.2rem">
@@ -517,22 +515,37 @@
           <button class="option-btn"></button>
           <button class="option-btn"></button>
         </div>
-        <div id="hardUI" class="input-row hidden">
-          <input
-            type="text"
-            class="guess-input"
-            id="guessInput"
-            placeholder="Type name..."
-            autocomplete="off"
-          />
-          <button class="btn-go" id="btnSubmit">GO</button>
+
+        <div id="hardUI" class="hidden" style="width: 100%">
+          <div
+            id="hardHint"
+            style="
+              font-size: 1.1rem;
+              color: var(--poke-yellow);
+              font-family: 'Bangers', cursive;
+              letter-spacing: 1px;
+              text-align: center;
+              margin-bottom: 10px;
+              text-shadow: 1px 1px 2px #000;
+            "
+          ></div>
+          <div class="input-row">
+            <input
+              type="text"
+              class="guess-input"
+              id="guessInput"
+              placeholder="Type name..."
+              autocomplete="off"
+            />
+            <button class="btn-go" id="btnSubmit">GO</button>
+          </div>
         </div>
+
         <button class="btn-action btn-skip" id="btnSkip">SKIP ⏭️</button>
         <button class="btn-action btn-next hidden" id="btnNext">NEXT →</button>
       </div>
     </div>
 
-    <!-- END SCREEN -->
     <div
       id="endScreen"
       class="game-card hidden"
@@ -994,6 +1007,26 @@
       let secondsElapsed = 0;
 
       // ── helpers ──────────────────────────────────────────────
+
+      /** Determine hint based on the Miscrit's name prefix */
+      function getHint(entry) {
+        if (entry.startsWith("Dark")) return "Hint: Dark.";
+        if (entry.startsWith("Light")) return "Hint: Light";
+        if (entry.startsWith("Foil")) return "Hint: Foil";
+        if (entry.startsWith("Blighted")) return "Hint: Blighted.";
+        if (
+          entry.includes("Boo ") ||
+          entry.includes("Vamp ") ||
+          entry.includes("Scarecrow ") ||
+          entry.includes("Pirate ") ||
+          entry.includes("Rocker ")
+        ) {
+          return "Hint: This looks like a spooky or special event variant!";
+        }
+
+        return "Hint: This is a standard Miscrit found in the wild.";
+      }
+
       /** Strip "_silhouette" suffix to get the display name */
       function cleanName(entry) {
         return entry.replace("_silhouette", "");
@@ -1147,6 +1180,10 @@
       function setupHard() {
         document.getElementById("hardUI").classList.remove("hidden");
         document.getElementById("easyUI").classList.add("hidden");
+
+        const entry = queue[currentIdx];
+        document.getElementById("hardHint").textContent = getHint(entry);
+
         const input = document.getElementById("guessInput");
         input.value = "";
         input.disabled = false;

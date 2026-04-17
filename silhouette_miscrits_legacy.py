@@ -8,7 +8,7 @@ Requirements:
     pip install Pillow rembg
 
 Usage:
-    python silhouette_miscrits.py
+    python3 silhouette_miscrits.py
     python silhouette_miscrits.py --input my_folder --output my_output
 """
 
