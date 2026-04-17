@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Who's That Miscrit?!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-dark: #161224;
+        --poke-yellow: #ffcb05;
+        --poke-blue: #2a75bb;
+        --poke-dark-blue: #1d2c5e;
+        --burst-blue: #5fc3fa;
+        --red-outer: #cc2229;
+        --red-dark: #8b1317;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg-dark);
+        color: white;
+        font-family: "Nunito", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 16px;
+      }
+
+      /* Pokemon Style Text */
+      .title-text {
+        font-family: "Bangers", cursive;
+        font-size: 2.8rem;
+        color: var(--poke-yellow);
+        text-align: center;
+        letter-spacing: 2px;
+        text-shadow: -3px -3px 0 var(--poke-blue), 3px -3px 0 var(--poke-blue),
+          -3px 3px 0 var(--poke-blue), 3px 3px 0 var(--poke-blue),
+          0px 6px 0 var(--poke-dark-blue);
+        line-height: 1.1;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .scoreboard {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+        font-family: "Bangers", cursive;
+        font-size: 1.5rem;
+        color: var(--poke-yellow);
+        letter-spacing: 1px;
+      }
+
+      /* Main Game Card Container */
+      .game-card {
+        position: relative;
+        background: var(--red-outer);
+        border: 6px solid var(--red-dark);
+        border-radius: 24px;
+        padding: 20px;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6),
+          inset 0 0 20px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      /* The Anime Sunburst Effect */
+      .burst-rays {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 150%;
+        height: 150%;
+        transform: translate(-50%, -50%);
+        background: repeating-conic-gradient(
+          from 0deg,
+          #ffffff 0deg 3deg,
+          var(--burst-blue) 3deg 6deg
+        );
+        mask-image: radial-gradient(
+          circle,
+          rgba(0, 0, 0, 1) 15%,
+          rgba(0, 0, 0, 0) 65%
+        );
+        -webkit-mask-image: radial-gradient(
+          circle,
+          rgba(0, 0, 0, 1) 15%,
+          rgba(0, 0, 0, 0) 65%
+        );
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Floating Question Mark */
+      .question-mark {
+        position: absolute;
+        right: 20px;
+        top: 80px;
+        font-family: "Bangers", cursive;
+        font-size: 6rem;
+        color: var(--poke-yellow);
+        text-shadow: -4px -4px 0 var(--poke-blue), 4px -4px 0 var(--poke-blue),
+          -4px 4px 0 var(--poke-blue), 4px 4px 0 var(--poke-blue),
+          6px 6px 0 var(--poke-dark-blue);
+        transform: rotate(15deg);
+        z-index: 2;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(15deg);
+        }
+        50% {
+          transform: translateY(-15px) rotate(10deg);
+        }
+      }
+
+      /* Image Styling */
+      .image-wrap {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 240px;
+        margin-bottom: 10px;
+        z-index: 2;
+      }
+
+      .miscrit-img {
+        max-height: 220px;
+        max-width: 100%;
+        filter: brightness(0) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); /* Pure black with glowing edge */
+        transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .miscrit-img.revealed {
+        filter: brightness(1) drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.5));
+      }
+
+      /* Feedback Pill */
+      .feedback-wrapper {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        min-height: 40px;
+      }
+      .feedback {
+        background: white;
+        border-radius: 999px;
+        padding: 6px 20px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .feedback.correct {
+        color: #28a745;
+        border: 2px solid #28a745;
+      }
+      .feedback.wrong {
+        color: #dc3545;
+        border: 2px solid #dc3545;
+      }
+
+      /* UI Controls */
+      .ui-container {
+        position: relative;
+        z-index: 2;
+        margin-top: 20px;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 10px;
+      }
+      .guess-input {
+        flex: 1;
+        background: var(--bg-dark);
+        border: 2px solid #000;
+        border-radius: 12px;
+        color: white;
+        padding: 15px;
+        outline: none;
+        font-family: "Nunito", sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.5);
+      }
+
+      .btn-go {
+        background: var(--poke-yellow);
+        color: black;
+        border: 2px solid #000;
+        border-radius: 12px;
+        font-family: "Bangers", cursive;
+        font-size: 1.6rem;
+        padding: 0 25px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        box-shadow: 0 4px 0 #b38f00;
+      }
+      .btn-go:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #b38f00;
+      }
+
+      .btn-next {
+        background: #ed6c6c;
+        color: white;
+        border: 2px solid #a83232;
+        border-radius: 12px;
+        font-family: "Bangers", cursive;
+        font-size: 1.6rem;
+        padding: 12px;
+        width: 100%;
+        cursor: pointer;
+        margin-top: 15px;
+        box-shadow: 0 4px 0 #a83232;
+        letter-spacing: 1px;
+      }
+      .btn-next:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #a83232;
+      }
+
+      /* Easy Mode Options */
+      .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .option-btn {
+        background: var(--bg-dark);
+        border: 2px solid #000;
+        border-radius: 12px;
+        color: white;
+        padding: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+        font-family: "Nunito", sans-serif;
+      }
+      .option-btn:hover {
+        background: var(--poke-dark-blue);
+      }
+      .option-btn.correct {
+        background: #28a745 !important;
+      }
+      .option-btn.wrong {
+        background: #dc3545 !important;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scoreboard">
+      <div>SCORE: <span id="scoreCorrect">0</span></div>
+      <div>ROUND: <span id="roundNum">1</span>/50</div>
+    </div>
+
+    <div class="game-card" id="introScreen">
+      <div class="burst-rays"></div>
+      <div class="title-text">WHO'S THAT<br />MISCRIT...?</div>
+
+      <div
+        class="ui-container"
+        style="
+          background: rgba(0, 0, 0, 0.5);
+          padding: 20px;
+          border-radius: 16px;
+        "
+      >
+        <h2 style="text-align: center; margin-bottom: 15px">
+          Select Difficulty
+        </h2>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px">
+          <button
+            class="option-btn"
+            style="flex: 1; border-color: var(--poke-yellow)"
+            id="pickEasy"
+          >
+            Easy (Choices)
+          </button>
+          <button class="option-btn" style="flex: 1" id="pickHard">
+            Hard (Type)
+          </button>
+        </div>
+        <button
+          class="btn-next"
+          id="btnStart"
+          style="
+            background: var(--poke-yellow);
+            color: black;
+            box-shadow: 0 4px 0 #b38f00;
+            border-color: #000;
+          "
+        >
+          START GAME
+        </button>
+      </div>
+    </div>
+
+    <div id="gameScreen" class="game-card hidden">
+      <div class="burst-rays"></div>
+
+      <div class="title-text" style="font-size: 2.2rem">
+        WHO'S THAT MISCRIT...?
+      </div>
+      <div class="question-mark">?</div>
+
+      <div class="feedback-wrapper">
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+
+      <div class="image-wrap">
+        <img class="miscrit-img" id="miscritImg" src="" alt="Silhouette" />
+      </div>
+
+      <div class="ui-container">
+        <div id="easyUI" class="options-grid">
+          <button class="option-btn"></button>
+          <button class="option-btn"></button>
+          <button class="option-btn"></button>
+          <button class="option-btn"></button>
+        </div>
+
+        <div id="hardUI" class="input-row hidden">
+          <input
+            type="text"
+            class="guess-input"
+            id="guessInput"
+            placeholder="Type name..."
+            autocomplete="off"
+          />
+          <button class="btn-go" id="btnSubmit">GO</button>
+        </div>
+
+        <button class="btn-next hidden" id="btnNext">NEXT →</button>
+      </div>
+    </div>
+
+    <script>
+      // Make sure these names match your files in the 'miscrits_silhouettes' folder EXACTLY
+      const MISCRITS_DATA = [
+        "Aebex_silhouette",
+        "Agnuf_silhouette",
+        "Aguapogo_silhouette",
+        "Alpha_silhouette",
+        "Ampupine_silhouette",
+        "Aquarion_silhouette",
+        "Aria_silhouette",
+        "Arigato_silhouette",
+        "Auger_silhouette",
+        "Avarus_silhouette",
+        "Babakku_silhouette",
+        "Beakka_silhouette",
+        "Beateorite_silhouette",
+        "Beelzebug_silhouette",
+        "Beetor_silhouette",
+        "Beldame_silhouette",
+        "Blazebit_silhouette",
+        "Blazertooth_silhouette",
+        "Blighted Cubsprout_silhouette",
+        "Blighted Fiender_silhouette",
+        "Blighted Flowerpiller_silhouette",
+        "Blighted Flue_silhouette",
+        "Blighted Kiloray_silhouette",
+        "Blobroller_silhouette",
+        "Bloombat_silhouette",
+        "Bloomple_silhouette",
+        "Blowpuffle_silhouette",
+        "Blub_silhouette",
+        "Bludger_silhouette",
+        "Blug_silhouette",
+        "Boltzee_silhouette",
+        "Boneshee_silhouette",
+        "Boo Blazertooth_silhouette",
+        "Brainzer_silhouette",
+        "Breezycheeks_silhouette",
+        "Bubbles_silhouette",
+        "Budillo_silhouette",
+        "Bunaken_silhouette",
+        "Bunplop_silhouette",
+        "Cadbunny_silhouette",
+        "Casanova_silhouette",
+        "Cerberuff_silhouette",
+        "Charix_silhouette",
+        "Charpy_silhouette",
+        "Crabbles_silhouette",
+        "Craggy_silhouette",
+        "Crickin_silhouette",
+        "Croaky_silhouette",
+        "Cubsprout_silhouette",
+        "Da Windy_silhouette",
+        "Dabee_silhouette",
+        "Daloo_silhouette",
+        "Damse_silhouette",
+        "Dark Aria_silhouette",
+        "Dark Arigato_silhouette",
+        "Dark Auger_silhouette",
+        "Dark Beetor_silhouette",
+        "Dark Breezycheeks_silhouette",
+        "Dark Bubbles_silhouette",
+        "Dark Croaky_silhouette",
+        "Dark Cubsprout_silhouette",
+        "Dark Echino_silhouette",
+        "Dark Eggy_silhouette",
+        "Dark Elefauna_silhouette",
+        "Dark Flameling_silhouette",
+        "Dark Flowerpiller_silhouette",
+        "Dark Flue_silhouette",
+        "Dark Flutterpat_silhouette",
+        "Dark Frostmite_silhouette",
+        "Dark Gippo_silhouette",
+        "Dark Gurgleplops_silhouette",
+        "Dark Hoghedge_silhouette",
+        "Dark Hotfoot_silhouette",
+        "Dark Humbug_silhouette",
+        "Dark Hydroseal_silhouette",
+        "Dark Jellyshock_silhouette",
+        "Dark Kiloray_silhouette",
+        "Dark Lavarilla_silhouette",
+        "Dark Lumera_silhouette",
+        "Dark Luna_silhouette",
+        "Dark Nessy_silhouette",
+        "Dark Owlie_silhouette",
+        "Dark Pillblaze_silhouette",
+        "Dark Poltergust_silhouette",
+        "Dark Prawnja_silhouette",
+        "Dark Quirk_silhouette",
+        "Dark Shellbee_silhouette",
+        "Dark Slithero_silhouette",
+        "Dark Snortus_silhouette",
+        "Dark Sparkitten_silhouette",
+        "Dark Sparkslug_silhouette",
+        "Dark Sparkupine_silhouette",
+        "Dark Spinnerette_silhouette",
+        "Dark Squibee_silhouette",
+        "Dark Squirmle_silhouette",
+        "Dark Steamguin_silhouette",
+        "Dark Tongutail_silhouette",
+        "Dark Treemur_silhouette",
+        "Dark Tulipinny_silhouette",
+        "Dark Twiggum_silhouette",
+        "Dark Vexie_silhouette",
+        "Dark Viperd_silhouette",
+        "Dark Waddles_silhouette",
+        "Dark Weevern_silhouette",
+        "Dark Whik_silhouette",
+        "Deetlee_silhouette",
+        "Defilio_silhouette",
+        "Digsy_silhouette",
+        "Dorux_silhouette",
+        "Dreamger_silhouette",
+        "Drilldent_silhouette",
+        "Drilune_silhouette",
+        "Echino_silhouette",
+        "Eclipso_silhouette",
+        "Eggy_silhouette",
+        "Ekkult_silhouette",
+        "Elefauna_silhouette",
+        "Elphin_silhouette",
+        "Eluzar_silhouette",
+        "Enex_silhouette",
+        "Equestrion_silhouette",
+        "Fangly_silhouette",
+        "Felis_silhouette",
+        "Fennie_silhouette",
+        "Fickra_silhouette",
+        "Fiender_silhouette",
+        "Flaclay_silhouette",
+        "Flameling_silhouette",
+        "Flaring_silhouette",
+        "Flintly_silhouette",
+        "Flowerpiller_silhouette",
+        "Flue_silhouette",
+        "Flurfy_silhouette",
+        "Flurrious_silhouette",
+        "Flutterpat_silhouette",
+        "Foil Croaky_silhouette",
+        "Foil Flintly_silhouette",
+        "Foil Fossillia_silhouette",
+        "Foil Kiloray_silhouette",
+        "Foil Liquifien_silhouette",
+        "Foil Luna_silhouette",
+        "Foil Pamboo_silhouette",
+        "Foil Pangoleaf_silhouette",
+        "Foil Rockodile_silhouette",
+        "Foil Thundercracker_silhouette",
+        "Foil Vexie_silhouette",
+        "Foil Vhisp_silhouette",
+        "Foil Waddles_silhouette",
+        "Fossillia_silhouette",
+        "Freedom_silhouette",
+        "Freezet_silhouette",
+        "Frostmite_silhouette",
+        "Frozy_silhouette",
+        "Fubby_silhouette",
+        "Fungask_silhouette",
+        "Furiko_silhouette",
+        "Gemix_silhouette",
+        "Geneseed_silhouette",
+        "Gippo_silhouette",
+        "Glary_silhouette",
+        "Gog_silhouette",
+        "Goo_silhouette",
+        "Gravitron_silhouette",
+        "Grimm Kiloray_silhouette",
+        "Grubbean_silhouette",
+        "Gurgleplops_silhouette",
+        "Hawkai_silhouette",
+        "Hekatom_silhouette",
+        "Hippoke_silhouette",
+        "Hoghedge_silhouette",
+        "Hoopty_silhouette",
+        "Hotdog_silhouette",
+        "Hotfoot_silhouette",
+        "Humbug_silhouette",
+        "Hydroseal_silhouette",
+        "Ignios_silhouette",
+        "Inferno_silhouette",
+        "Jack_silhouette",
+        "Jellyshock_silhouette",
+        "Kawanko_silhouette",
+        "Keeper_silhouette",
+        "Kelpa_silhouette",
+        "Kiloray_silhouette",
+        "Kitpole_silhouette",
+        "Lagoony_silhouette",
+        "Lambolt_silhouette",
+        "Larbunni_silhouette",
+        "Lavarilla_silhouette",
+        "Lavazard_silhouette",
+        "Leggy_silhouette",
+        "Lheon_silhouette",
+        "Light Bludger_silhouette",
+        "Light Crickin_silhouette",
+        "Light Digsy_silhouette",
+        "Light Flue_silhouette",
+        "Light Flurfy_silhouette",
+        "Light Fossillia_silhouette",
+        "Light Frostmite_silhouette",
+        "Light Grubbean_silhouette",
+        "Light Hawkai_silhouette",
+        "Light Ignios_silhouette",
+        "Light Jack_silhouette",
+        "Light Lavarilla_silhouette",
+        "Light Mumbah_silhouette",
+        "Light Nanaslug_silhouette",
+        "Light Nibbles_silhouette",
+        "Light Quirk_silhouette",
+        "Light Rafiery_silhouette",
+        "Light Slithero_silhouette",
+        "Light Snorkels_silhouette",
+        "Light Sparkspeck_silhouette",
+        "Light Squibee_silhouette",
+        "Light Statikat_silhouette",
+        "Light Tectonyx_silhouette",
+        "Light Twiggum_silhouette",
+        "Light Wavesling_silhouette",
+        "Light Weevern_silhouette",
+        "Light Zaptor_silhouette",
+        "Lil Bubs_silhouette",
+        "Liothning_silhouette",
+        "Liquifien_silhouette",
+        "Lithos_silhouette",
+        "Lumera_silhouette",
+        "Lumite_silhouette",
+        "Luna_silhouette",
+        "Lunako_silhouette",
+        "Lutox_silhouette",
+        "Luvcraft_silhouette",
+        "Magpole_silhouette",
+        "Mama_silhouette",
+        "Manio_silhouette",
+        "Mech_silhouette",
+        "Microblast_silhouette",
+        "Mistraxol_silhouette",
+        "Mooncrit_silhouette",
+        "Moondrip_silhouette",
+        "Mucora_silhouette",
+        "Mumbah_silhouette",
+        "Mun Kee_silhouette",
+        "Nanaslug_silhouette",
+        "Narlope_silhouette",
+        "Nero_silhouette",
+        "Nessy_silhouette",
+        "Nibbles_silhouette",
+        "Niboro_silhouette",
+        "Nubyll_silhouette",
+        "Nyma_silhouette",
+        "Octavio_silhouette",
+        "Oozie_silhouette",
+        "Opigum_silhouette",
+        "Orbling_silhouette",
+        "Orcatide_silhouette",
+        "Osmeron_silhouette",
+        "Owlie_silhouette",
+        "Pachydo_silhouette",
+        "Padma_silhouette",
+        "Pamboo_silhouette",
+        "Pangoleaf_silhouette",
+        "Papa_silhouette",
+        "Patchkin_silhouette",
+        "Peekly_silhouette",
+        "Peepsie_silhouette",
+        "Pennon_silhouette",
+        "Pestling_silhouette",
+        "Phoboros_silhouette",
+        "Pillblaze_silhouette",
+        "Pinplar_silhouette",
+        "Pirate Bludger_silhouette",
+        "Piskie_silhouette",
+        "Pithapillar_silhouette",
+        "Podo_silhouette",
+        "Pollifog_silhouette",
+        "Poltergust_silhouette",
+        "Poppet_silhouette",
+        "Prawnja_silhouette",
+        "Pyras_silhouette",
+        "Pyrex_silhouette",
+        "Quebble_silhouette",
+        "Quirk_silhouette",
+        "Rafiery_silhouette",
+        "Raldio_silhouette",
+        "Rephily_silhouette",
+        "Rexie_silhouette",
+        "Ribos_silhouette",
+        "Rocker Octavio_silhouette",
+        "Rockodile_silhouette",
+        "Rudy_silhouette",
+        "Sapphron_silhouette",
+        "Scarecrow Charix_silhouette",
+        "Shellbee_silhouette",
+        "Shroolet_silhouette",
+        "Shroomer_silhouette",
+        "Shurikoon_silhouette",
+        "Silkire_silhouette",
+        "Skelepup_silhouette",
+        "Skustunk_silhouette",
+        "Sledgehog_silhouette",
+        "Slithero_silhouette",
+        "Smolderfry_silhouette",
+        "Snatcher_silhouette",
+        "Snorkels_silhouette",
+        "Snortus_silhouette",
+        "Sol_silhouette",
+        "Sora_silhouette",
+        "Spangles_silhouette",
+        "Sparkitten_silhouette",
+        "Sparkslug_silhouette",
+        "Sparkspeck_silhouette",
+        "Sparkupine_silhouette",
+        "Spinnerette_silhouette",
+        "Splender_silhouette",
+        "Squawcat_silhouette",
+        "Squibee_silhouette",
+        "Squirmle_silhouette",
+        "Stalkra_silhouette",
+        "Statikat_silhouette",
+        "Steamguin_silhouette",
+        "Tectonyx_silhouette",
+        "Thundercracker_silhouette",
+        "Tongutail_silhouette",
+        "Treemur_silhouette",
+        "Tulipinny_silhouette",
+        "Twiggum_silhouette",
+        "Ursiwave_silhouette",
+        "Valentino_silhouette",
+        "Vamp Skustunk_silhouette",
+        "Vexie_silhouette",
+        "Vhisp_silhouette",
+        "Viperd_silhouette",
+        "Voidotron_silhouette",
+        "Voltombra_silhouette",
+        "Waddles_silhouette",
+        "Warrian_silhouette",
+        "Wavesling_silhouette",
+        "Weevern_silhouette",
+        "Whik_silhouette",
+        "Whispen_silhouette",
+        "Winnebeargo_silhouette",
+        "Woolly_silhouette",
+        "Yuefira_silhouette",
+        "Zappup_silhouette",
+        "Zaptor_silhouette",
+        "Zephry_silhouette",
+        "Zhakor_silhouette",
+      ];
+
+      const FOLDER = "miscrits_silhouettes";
+      let gameMode = "easy";
+      let currentIdx = 0;
+      let score = 0;
+      let queue = [];
+      let answered = false;
+
+      // Mode Selection
+      document.getElementById("pickEasy").onclick = () => {
+        gameMode = "easy";
+        updateModeBtns();
+      };
+      document.getElementById("pickHard").onclick = () => {
+        gameMode = "hard";
+        updateModeBtns();
+      };
+
+      function updateModeBtns() {
+        document.getElementById("pickEasy").style.borderColor =
+          gameMode === "easy" ? "var(--poke-yellow)" : "#000";
+        document.getElementById("pickHard").style.borderColor =
+          gameMode === "hard" ? "var(--poke-yellow)" : "#000";
+      }
+
+      document.getElementById("btnStart").onclick = () => {
+        queue = [...MISCRITS_DATA].sort(() => Math.random() - 0.5).slice(0, 50);
+        currentIdx = 0;
+        score = 0;
+        document.getElementById("introScreen").classList.add("hidden");
+        document.getElementById("gameScreen").classList.remove("hidden");
+        loadRound();
+      };
+
+      function loadRound() {
+        answered = false;
+        const name = queue[currentIdx];
+
+        // Ensure path loads exactly from your folder
+        const imgEl = document.getElementById("miscritImg");
+        imgEl.src = `${FOLDER}/${name}.png`;
+        imgEl.classList.remove("revealed");
+        imgEl.onerror = () => {
+          imgEl.src = "https://via.placeholder.com/200?text=Missing+Image";
+        };
+
+        document.getElementById("roundNum").textContent = currentIdx + 1;
+        document.getElementById("feedback").classList.add("hidden");
+        document.getElementById("btnNext").classList.add("hidden");
+
+        if (gameMode === "easy") setupEasy(name);
+        else setupHard();
+      }
+
+      function setupEasy(correctName) {
+        document.getElementById("easyUI").classList.remove("hidden");
+        document.getElementById("hardUI").classList.add("hidden");
+
+        let others = MISCRITS_DATA.filter((n) => n !== correctName)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 3);
+        let choices = [correctName, ...others].sort(() => Math.random() - 0.5);
+
+        const btns = document.querySelectorAll("#easyUI .option-btn");
+        btns.forEach((btn, i) => {
+          // Removes _silhouette for the button text display
+          btn.textContent = choices[i].replace("_silhouette", "");
+          btn.className = "option-btn";
+          btn.onclick = () => checkAnswer(choices[i], btn);
+        });
+      }
+
+      function setupHard() {
+        document.getElementById("hardUI").classList.remove("hidden");
+        document.getElementById("easyUI").classList.add("hidden");
+        const input = document.getElementById("guessInput");
+        input.value = "";
+        input.disabled = false;
+        input.focus();
+        document.getElementById("btnSubmit").onclick = () =>
+          checkAnswer(input.value);
+      }
+
+      function checkAnswer(guess, btn = null) {
+        if (answered) return;
+        answered = true;
+
+        const correctName = queue[currentIdx];
+        // Creates a clean version for display and validation
+        const cleanName = correctName.replace("_silhouette", "");
+
+        // Validates both the raw file name and the clean display name
+        const isCorrect =
+          guess.toLowerCase().trim() === correctName.toLowerCase() ||
+          guess.toLowerCase().trim() === cleanName.toLowerCase();
+
+        document.getElementById("miscritImg").classList.add("revealed");
+        document.getElementById("btnNext").classList.remove("hidden");
+        const feedback = document.getElementById("feedback");
+        feedback.classList.remove("hidden");
+
+        if (isCorrect) {
+          score++;
+          document.getElementById("scoreCorrect").textContent = score;
+          feedback.textContent = `Correct! It's ${cleanName}!`;
+          feedback.className = "feedback correct";
+          if (btn) btn.classList.add("correct");
+        } else {
+          feedback.textContent = `Wrong! It was ${cleanName}.`;
+          feedback.className = "feedback wrong";
+          if (btn) btn.classList.add("wrong");
+        }
+
+        if (gameMode === "hard")
+          document.getElementById("guessInput").disabled = true;
+      }
+
+      document.getElementById("btnNext").onclick = () => {
+        currentIdx++;
+        if (currentIdx < queue.length) {
+          loadRound();
+        } else {
+          alert(`Game Over! You guessed ${score} out of ${queue.length}!`);
+          location.reload();
+        }
+      };
+
+      document
+        .getElementById("guessInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") document.getElementById("btnSubmit").click();
+        });
+    </script>
+  </body>
+</html>
