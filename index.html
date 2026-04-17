@@ -52,14 +52,43 @@
         z-index: 2;
       }
 
+      /* Top Stats Bar */
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 480px;
+        margin-bottom: 15px;
+      }
+
+      .btn-home {
+        background: #ed6c6c;
+        color: white;
+        border: 2px solid #a83232;
+        border-radius: 8px;
+        font-family: "Bangers", cursive;
+        font-size: 1.2rem;
+        padding: 4px 12px;
+        cursor: pointer;
+        box-shadow: 0 3px 0 #a83232;
+        letter-spacing: 1px;
+      }
+      .btn-home:active {
+        transform: translateY(3px);
+        box-shadow: 0 0 0 #a83232;
+      }
+
       .scoreboard {
         display: flex;
         gap: 15px;
-        margin-bottom: 15px;
         font-family: "Bangers", cursive;
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         color: var(--poke-yellow);
         letter-spacing: 1px;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 5px 15px;
+        border-radius: 12px;
       }
 
       /* Main Game Card Container */
@@ -143,7 +172,7 @@
       .miscrit-img {
         max-height: 220px;
         max-width: 100%;
-        filter: brightness(0) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); /* Pure black with glowing edge */
+        filter: brightness(0) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8));
         transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .miscrit-img.revealed {
@@ -218,10 +247,9 @@
         box-shadow: 0 0 0 #b38f00;
       }
 
-      .btn-next {
-        background: #ed6c6c;
+      .btn-action {
         color: white;
-        border: 2px solid #a83232;
+        border: 2px solid #000;
         border-radius: 12px;
         font-family: "Bangers", cursive;
         font-size: 1.6rem;
@@ -229,20 +257,44 @@
         width: 100%;
         cursor: pointer;
         margin-top: 15px;
-        box-shadow: 0 4px 0 #a83232;
         letter-spacing: 1px;
+      }
+
+      .btn-next {
+        background: #ed6c6c;
+        border-color: #a83232;
+        box-shadow: 0 4px 0 #a83232;
       }
       .btn-next:active {
         transform: translateY(4px);
         box-shadow: 0 0 0 #a83232;
       }
 
-      /* Easy Mode Options */
+      .btn-skip {
+        background: var(--burst-blue);
+        border-color: var(--poke-dark-blue);
+        box-shadow: 0 4px 0 var(--poke-dark-blue);
+        color: var(--poke-dark-blue);
+      }
+      .btn-skip:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 var(--poke-dark-blue);
+      }
+
+      /* Options Grids */
       .options-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
+
+      .length-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+        margin-bottom: 20px;
+      }
+
       .option-btn {
         background: var(--bg-dark);
         border: 2px solid #000;
@@ -254,6 +306,13 @@
         transition: 0.2s;
         font-family: "Nunito", sans-serif;
       }
+      .length-grid .option-btn {
+        padding: 10px 5px;
+        font-size: 1.1rem;
+        font-family: "Bangers", cursive;
+        letter-spacing: 1px;
+      }
+
       .option-btn:hover {
         background: var(--poke-dark-blue);
       }
@@ -270,9 +329,17 @@
     </style>
   </head>
   <body>
-    <div class="scoreboard">
-      <div>SCORE: <span id="scoreCorrect">0</span></div>
-      <div>ROUND: <span id="roundNum">1</span>/50</div>
+    <div class="top-bar hidden" id="topStatsBar">
+      <button class="btn-home" id="btnHome">HOME</button>
+      <div class="scoreboard">
+        <div>⏱️ <span id="timeDisplay">00:00</span></div>
+        <div>⭐ <span id="scoreCorrect">0</span></div>
+        <div>
+          ROUND: <span id="roundNum">1</span>/<span id="totalRoundsDisplay"
+            >50</span
+          >
+        </div>
+      </div>
     </div>
 
     <div class="game-card" id="introScreen">
@@ -287,10 +354,18 @@
           border-radius: 16px;
         "
       >
-        <h2 style="text-align: center; margin-bottom: 15px">
-          Select Difficulty
+        <h2
+          style="
+            text-align: center;
+            margin-bottom: 10px;
+            font-family: 'Bangers', cursive;
+            color: var(--poke-yellow);
+            letter-spacing: 1px;
+          "
+        >
+          Difficulty
         </h2>
-        <div style="display: flex; gap: 10px; margin-bottom: 20px">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px">
           <button
             class="option-btn"
             style="flex: 1; border-color: var(--poke-yellow)"
@@ -302,8 +377,28 @@
             Hard (Type)
           </button>
         </div>
+
+        <h2
+          style="
+            text-align: center;
+            margin-bottom: 10px;
+            font-family: 'Bangers', cursive;
+            color: var(--poke-yellow);
+            letter-spacing: 1px;
+          "
+        >
+          Total Miscrits
+        </h2>
+        <div class="length-grid" id="lengthOptions">
+          <button class="option-btn length-btn" data-len="5">5</button>
+          <button class="option-btn length-btn" data-len="10">10</button>
+          <button class="option-btn length-btn" data-len="25">25</button>
+          <button class="option-btn length-btn" data-len="50">50</button>
+          <button class="option-btn length-btn" data-len="100">100</button>
+        </div>
+
         <button
-          class="btn-next"
+          class="btn-action"
           id="btnStart"
           style="
             background: var(--poke-yellow);
@@ -352,7 +447,92 @@
           <button class="btn-go" id="btnSubmit">GO</button>
         </div>
 
-        <button class="btn-next hidden" id="btnNext">NEXT →</button>
+        <button class="btn-action btn-skip" id="btnSkip">SKIP ⏭️</button>
+        <button class="btn-action btn-next hidden" id="btnNext">NEXT →</button>
+      </div>
+    </div>
+
+    <div id="endScreen" class="game-card hidden">
+      <div class="burst-rays"></div>
+      <div class="title-text" style="font-size: 3rem; margin-bottom: 20px">
+        FINISHED!
+      </div>
+
+      <div
+        class="ui-container"
+        style="
+          background: rgba(0, 0, 0, 0.6);
+          padding: 30px 20px;
+          border-radius: 16px;
+          text-align: center;
+        "
+      >
+        <h2
+          style="
+            font-family: 'Bangers', cursive;
+            color: var(--poke-yellow);
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+          "
+        >
+          Final Score
+        </h2>
+        <div
+          style="
+            font-family: 'Bangers', cursive;
+            font-size: 4.5rem;
+            color: #28a745;
+            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 25px;
+            line-height: 1;
+          "
+        >
+          <span id="finalScoreDisplay">0</span>
+          <span style="font-size: 2.5rem; color: #fff"
+            >/ <span id="finalTotalDisplay">0</span></span
+          >
+        </div>
+
+        <h2
+          style="
+            font-family: 'Bangers', cursive;
+            color: var(--poke-yellow);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+          "
+        >
+          Time
+        </h2>
+        <div
+          style="
+            font-family: 'Bangers', cursive;
+            font-size: 3rem;
+            color: var(--burst-blue);
+            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 35px;
+            line-height: 1;
+          "
+          id="finalTimeDisplay"
+        >
+          00:00
+        </div>
+
+        <button
+          class="btn-action"
+          id="btnPlayAgain"
+          style="
+            background: var(--poke-yellow);
+            color: black;
+            box-shadow: 0 4px 0 #b38f00;
+            border-color: #000;
+            font-size: 1.8rem;
+            padding: 15px;
+          "
+        >
+          PLAY AGAIN 🔄
+        </button>
       </div>
     </div>
 
@@ -707,12 +887,24 @@
 
       const FOLDER = "miscrits_silhouettes";
       let gameMode = "easy";
+      let totalMiscrits = 25; // Default length
       let currentIdx = 0;
       let score = 0;
       let queue = [];
       let answered = false;
+      let timerInterval = null;
+      let secondsElapsed = 0;
 
-      // Mode Selection
+      // --- HOME BUTTON ---
+      document.getElementById("btnHome").onclick = () => {
+        clearInterval(timerInterval);
+        document.getElementById("gameScreen").classList.add("hidden");
+        document.getElementById("topStatsBar").classList.add("hidden");
+        document.getElementById("endScreen").classList.add("hidden");
+        document.getElementById("introScreen").classList.remove("hidden");
+      };
+
+      // --- SELECTION LOGIC ---
       document.getElementById("pickEasy").onclick = () => {
         gameMode = "easy";
         updateModeBtns();
@@ -729,20 +921,67 @@
           gameMode === "hard" ? "var(--poke-yellow)" : "#000";
       }
 
+      // Length Selection setup
+      document.querySelectorAll(".length-btn").forEach((btn) => {
+        btn.onclick = (e) => {
+          totalMiscrits = parseInt(e.target.dataset.len);
+          document.querySelectorAll(".length-btn").forEach((b) => {
+            b.style.borderColor = "#000";
+            b.style.background = "var(--bg-dark)";
+          });
+          e.target.style.borderColor = "var(--poke-yellow)";
+          e.target.style.background = "var(--poke-dark-blue)";
+        };
+      });
+      // Click default value visually
+      document.querySelector('.length-btn[data-len="25"]').click();
+
+      // --- GAME START ---
       document.getElementById("btnStart").onclick = () => {
-        queue = [...MISCRITS_DATA].sort(() => Math.random() - 0.5).slice(0, 50);
+        // Shuffle and take N items
+        queue = [...MISCRITS_DATA]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, totalMiscrits);
         currentIdx = 0;
         score = 0;
+        secondsElapsed = 0;
+
+        document.getElementById("totalRoundsDisplay").textContent =
+          queue.length;
+        document.getElementById("scoreCorrect").textContent = score;
+
         document.getElementById("introScreen").classList.add("hidden");
+        document.getElementById("endScreen").classList.add("hidden");
+        document.getElementById("topStatsBar").classList.remove("hidden");
         document.getElementById("gameScreen").classList.remove("hidden");
+
+        startTimer();
         loadRound();
       };
 
+      // --- TIMER LOGIC ---
+      function startTimer() {
+        clearInterval(timerInterval);
+        updateTimerUI();
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          updateTimerUI();
+        }, 1000);
+      }
+
+      function updateTimerUI() {
+        let m = Math.floor(secondsElapsed / 60)
+          .toString()
+          .padStart(2, "0");
+        let s = (secondsElapsed % 60).toString().padStart(2, "0");
+        document.getElementById("timeDisplay").textContent = `${m}:${s}`;
+      }
+
+      // --- ROUND LOGIC ---
       function loadRound() {
         answered = false;
         const name = queue[currentIdx];
 
-        // Ensure path loads exactly from your folder
         const imgEl = document.getElementById("miscritImg");
         imgEl.src = `${FOLDER}/${name}.png`;
         imgEl.classList.remove("revealed");
@@ -753,6 +992,7 @@
         document.getElementById("roundNum").textContent = currentIdx + 1;
         document.getElementById("feedback").classList.add("hidden");
         document.getElementById("btnNext").classList.add("hidden");
+        document.getElementById("btnSkip").classList.remove("hidden");
 
         if (gameMode === "easy") setupEasy(name);
         else setupHard();
@@ -769,7 +1009,6 @@
 
         const btns = document.querySelectorAll("#easyUI .option-btn");
         btns.forEach((btn, i) => {
-          // Removes _silhouette for the button text display
           btn.textContent = choices[i].replace("_silhouette", "");
           btn.className = "option-btn";
           btn.onclick = () => checkAnswer(choices[i], btn);
@@ -787,21 +1026,22 @@
           checkAnswer(input.value);
       }
 
+      // --- ANSWER VALIDATION ---
       function checkAnswer(guess, btn = null) {
         if (answered) return;
         answered = true;
 
         const correctName = queue[currentIdx];
-        // Creates a clean version for display and validation
         const cleanName = correctName.replace("_silhouette", "");
 
-        // Validates both the raw file name and the clean display name
         const isCorrect =
           guess.toLowerCase().trim() === correctName.toLowerCase() ||
           guess.toLowerCase().trim() === cleanName.toLowerCase();
 
         document.getElementById("miscritImg").classList.add("revealed");
         document.getElementById("btnNext").classList.remove("hidden");
+        document.getElementById("btnSkip").classList.add("hidden"); // Hide skip when answered
+
         const feedback = document.getElementById("feedback");
         feedback.classList.remove("hidden");
 
@@ -821,14 +1061,46 @@
           document.getElementById("guessInput").disabled = true;
       }
 
+      // --- SKIP LOGIC ---
+      document.getElementById("btnSkip").onclick = () => {
+        if (answered) return;
+
+        // Take the current miscrit and push it to the end of the array
+        const skippedMiscrit = queue.splice(currentIdx, 1)[0];
+        queue.push(skippedMiscrit);
+
+        // Reload round (currentIdx stays the same, but it points to the new item that slid forward)
+        loadRound();
+      };
+
+      // --- NEXT LOGIC (UPDATED FOR CUSTOM END SCREEN) ---
       document.getElementById("btnNext").onclick = () => {
         currentIdx++;
         if (currentIdx < queue.length) {
           loadRound();
         } else {
-          alert(`Game Over! You guessed ${score} out of ${queue.length}!`);
-          location.reload();
+          clearInterval(timerInterval);
+          let timeFinal = document.getElementById("timeDisplay").textContent;
+
+          // Hide game UI elements
+          document.getElementById("gameScreen").classList.add("hidden");
+          document.getElementById("topStatsBar").classList.add("hidden");
+
+          // Populate Final Stats
+          document.getElementById("finalScoreDisplay").textContent = score;
+          document.getElementById("finalTotalDisplay").textContent =
+            queue.length;
+          document.getElementById("finalTimeDisplay").textContent = timeFinal;
+
+          // Show Custom End Screen
+          document.getElementById("endScreen").classList.remove("hidden");
         }
+      };
+
+      // --- PLAY AGAIN LOGIC ---
+      document.getElementById("btnPlayAgain").onclick = () => {
+        document.getElementById("endScreen").classList.add("hidden");
+        document.getElementById("introScreen").classList.remove("hidden");
       };
 
       document
