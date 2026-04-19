@@ -45,7 +45,7 @@ h1.logo{font-family:'Bangers',cursive;font-size:2.6rem;color:var(--accent);lette
 .miscrit-img.silhouette{filter:brightness(0) contrast(1) drop-shadow(0 0 12px rgba(108,63,197,.5))}
 .miscrit-img.revealed{filter:drop-shadow(0 8px 20px rgba(0,0,0,.5));transform:scale(1.05);animation:pop .4s cubic-bezier(.34,1.56,.64,1) forwards}
 @keyframes pop{0%{transform:scale(.8)}60%{transform:scale(1.1)}100%{transform:scale(1.05)}}
-.easiest-label{position:absolute;top:6px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#27ae60,#2ecc71);border-radius:999px;padding:3px 14px;font-size:.75rem;font-weight:800;letter-spacing:1px;color:#fff;white-space:nowrap}
+.easiest-label{display:block;text-align:center;background:linear-gradient(90deg,#27ae60,#2ecc71);border-radius:999px;padding:4px 16px;font-size:.78rem;font-weight:800;letter-spacing:1px;color:#fff;white-space:nowrap;margin-bottom:8px;width:fit-content;margin-left:auto;margin-right:auto}
 
 .feedback-bar{min-height:38px;display:flex;justify-content:center;margin-bottom:12px}
 .feedback{padding:7px 22px;border-radius:999px;font-weight:800;font-size:1rem;display:none}
@@ -140,8 +140,8 @@ h1.logo{font-family:'Bangers',cursive;font-size:2.6rem;color:var(--accent);lette
 <!-- GAME -->
 <div class="card hidden" id="gameScreen">
   <div class="round-badge">ROUND <span id="gRound">1</span> OF <span id="gTotal">25</span></div>
+  <span class="easiest-label hidden" id="easiestLabel">👁 FULL IMAGE — EASIEST MODE</span>
   <div class="img-stage">
-    <span class="easiest-label hidden" id="easiestLabel">👁 FULL IMAGE — EASIEST MODE</span>
     <img class="miscrit-img" id="miscritImg" src="" alt="Miscrit"/>
   </div>
   <div class="feedback-bar"><div class="feedback" id="feedback"></div></div>
