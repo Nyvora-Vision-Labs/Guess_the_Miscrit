@@ -27,3 +27,5 @@ A nostalgic, interactive web game where players test their knowledge by guessing
 ├── images_scraped_from_miscripedia/       # Original, full-color Miscrit images + index.csv
 └── miscrits_silhouettes/                  # Processed, solid-black silhouette images used in-game
 ```
+
+## New miscrits will be added after a week of their release.
